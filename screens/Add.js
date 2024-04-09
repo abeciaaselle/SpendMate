@@ -1,8 +1,9 @@
-// Add.js
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons'; 
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TextInput, Modal, Dimensions } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+
+const { width } = Dimensions.get('window');
 
 const categories = [
   { name: 'Transportation', icon: 'bus' },
@@ -33,17 +34,16 @@ const Add = () => {
   const handleAddExpense = () => {
     if (selectedCategory) {
       console.log('Added expense:', amount, memo);
-      navigation.navigate('Home', { 
-        category: selectedCategory.name, 
-        icon: selectedCategory.icon, 
-        amount, 
-        memo, 
-        income, 
-        isExpense: true 
+      navigation.navigate('Home', {
+        category: selectedCategory.name,
+        icon: selectedCategory.icon,
+        amount,
+        memo,
+        income: income || 0, // Use 0 if income is not provided
+        isExpense: true
       });
     }
   };
-  
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
@@ -65,40 +65,42 @@ const Add = () => {
       <ScrollView style={styles.content}>
         <View style={styles.categoryContainer}>
           {categories.map((category, index) => (
-            <TouchableOpacity key={index} style={styles.categoryItem} onPress={() => handleCategorySelect(category)}>
-              <MaterialCommunityIcons name={category.icon} size={28} color="#3F5D32" />
-              <Text style={styles.categoryName}>{category.name}</Text>
+            <TouchableOpacity key={index} style={[styles.categoryItem, width > 500 ? styles.largeScreen : styles.smallScreen]} onPress={() => handleCategorySelect(category)}>
+              <View style={styles.categoryBox}>
+                <MaterialCommunityIcons name={category.icon} size={28} color="white" />
+                <Text style={styles.categoryName}>{category.name}</Text>
+              </View>
             </TouchableOpacity>
           ))}
         </View>
-        {showInputs && (
-          <>
+        <Modal visible={showInputs} animationType="slide">
+          <View style={styles.modalContainer}>
             <TextInput
-              style={styles.calculatorInput}
+              style={styles.input}
               value={amount}
               onChangeText={text => setAmount(text)}
-              placeholder="0"
+              placeholder="Amount"
               keyboardType="numeric"
             />
             <TextInput
               style={styles.input}
               value={memo}
               onChangeText={text => setMemo(text)}
-              placeholder="Add memo"
+              placeholder="Memo"
               multiline
             />
             <TextInput
               style={styles.input}
               value={income}
               onChangeText={text => setIncome(text)}
-              placeholder="Monthly Income"
+              placeholder="Income"
               keyboardType="numeric"
             />
             <TouchableOpacity style={styles.addButton} onPress={handleAddExpense}>
               <Text style={styles.addButtonText}>Add Expense</Text>
             </TouchableOpacity>
-          </>
-        )}
+          </View>
+        </Modal>
       </ScrollView>
     </View>
   );
@@ -130,24 +132,37 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   categoryItem: {
-    alignItems: 'center',
-    marginBottom: 20,
     width: '48%',
+    marginBottom: 20,
+  },
+  largeScreen: {
+    width: '23%',
+  },
+  smallScreen: {
+    width: '31%',
+  },
+  categoryBox: {
+    alignItems: 'center',
+    backgroundColor: '#3F5D32',
+    borderRadius: 5,
+    padding: 10,
+    elevation: 3, // Shadow for Android
+    shadowColor: '#000', // Shadow for iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   categoryName: {
     marginTop: 5,
     fontSize: 14,
     textAlign: 'center',
+    color: 'white',
   },
-  calculatorInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 20,
-    textAlign: 'center',
-    fontSize: 24,
-    fontWeight: 'bold',
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
   input: {
     borderWidth: 1,
@@ -155,12 +170,14 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginBottom: 20,
+    width: '100%',
   },
   addButton: {
     backgroundColor: '#3F5D32',
     padding: 15,
     borderRadius: 5,
     alignItems: 'center',
+    width: '100%',
   },
   addButtonText: {
     color: 'white',
