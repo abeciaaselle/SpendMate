@@ -33,9 +33,17 @@ const Add = () => {
   const handleAddExpense = () => {
     if (selectedCategory) {
       console.log('Added expense:', amount, memo);
-      navigation.navigate('Home', { name: selectedCategory.name, amount, memo, income, isExpense: true });
+      navigation.navigate('Home', { 
+        category: selectedCategory.name, 
+        icon: selectedCategory.icon, 
+        amount, 
+        memo, 
+        income, 
+        isExpense: true 
+      });
     }
   };
+  
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);

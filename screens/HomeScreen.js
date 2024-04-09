@@ -33,7 +33,7 @@ const HomeScreen = ({ route }) => {
   const [totalIncome, setTotalIncome] = useState(0);
   const [userName, setUserName] = useState('');
 
-  const { name, amount, memo, category, income } = route.params || {};
+  const { name, icon, amount, memo, category, income } = route.params || {};
 
   useEffect(() => {
     if (amount) {
@@ -62,9 +62,10 @@ const HomeScreen = ({ route }) => {
         <MaterialCommunityIcons name={getCategoryIcon(expense.category)} size={24} color="#3F5D32" />
         <View style={styles.expenseData}>
           <Text style={styles.expenseLabel}>{expense.category}</Text>
-          <Text style={styles.expenseMemo}>{expense.memo}</Text>
           <Text style={styles.expenseTime}>{moment(expense.date).format('HH:mm')}</Text>
         </View>
+        <Text style={styles.expenseMemo}>{expense.memo || ' '}</Text> {/* Adjusted line */}
+
         <Text style={styles.expenseAmount}>₱{expense.amount.toFixed(2)}</Text>
       </View>
     ));
@@ -186,9 +187,9 @@ const styles = StyleSheet.create({
   expenseItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     marginBottom: 10,
   },
+  
   expenseData: {
     flex: 1,
     marginRight: 10,
@@ -200,6 +201,8 @@ const styles = StyleSheet.create({
   expenseMemo: {
     fontSize: 14,
     color: '#777777',
+    flex: 1,
+
   },
   expenseTime: {
     fontSize: 12,
@@ -209,6 +212,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  
   addButton: {
     position: 'absolute',
     bottom: 20,
