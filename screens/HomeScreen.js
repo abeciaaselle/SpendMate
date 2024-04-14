@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Dimensions, ImageBackground, Alert, ScrollView, Platform } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Dimensions, ImageBackground, ScrollView, Platform, Modal, TextInput, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Calendar } from 'react-native-calendars';
 import moment from 'moment';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const categories = [
   { name: 'Transportation', icon: 'bus' },
@@ -34,12 +34,17 @@ const HomeScreen = ({ route }) => {
   const [totalIncome, setTotalIncome] = useState(0);
   const [userName, setUserName] = useState('');
   const [markedDates, setMarkedDates] = useState({});
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [expenseToDelete, setExpenseToDelete] = useState(null);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editExpense, setEditExpense] = useState(null);
+  const [editAmount, setEditAmount] = useState('');
 
   const { name, icon, amount, memo, category, income } = route.params || {};
 
   useEffect(() => {
     if (amount) {
-      const newExpense = { category, amount: parseFloat(amount), memo, date: new Date() };
+      const newExpense = { id: expenses.length + 1, category, amount: parseFloat(amount), memo, date: new Date() };
       setExpenses(prevExpenses => [...prevExpenses, newExpense]);
       setTotalExpense(prevTotalExpense => prevTotalExpense + parseFloat(amount));
     }
@@ -79,9 +84,22 @@ const HomeScreen = ({ route }) => {
     Alert.alert(`Total Expenses for ${dateString}: ₱${totalExpensesForDate.toFixed(2)}`);
   };
 
+  const handleDeleteExpense = (expense) => {
+    setExpenseToDelete(expense);
+    setDeleteModalVisible(true);
+  };
+
+  const confirmDeleteExpense = () => {
+    const newExpenses = expenses.filter(exp => exp !== expenseToDelete);
+    const deletedAmount = expenseToDelete.amount;
+    setExpenses(newExpenses);
+    setTotalExpense(prevTotalExpense => prevTotalExpense - deletedAmount);
+    setDeleteModalVisible(false);
+  };
+
   const renderExpenseItems = () => {
     return expenses.map((expense, index) => (
-      <View key={index} style={styles.expenseItem}>
+      <View key={expense.id + index} style={styles.expenseItem}>
         <MaterialCommunityIcons name={getCategoryIcon(expense.category)} size={24} color="#3F5D32" />
         <View style={styles.expenseData}>
           <Text style={styles.expenseLabel}>{expense.category}</Text>
@@ -89,6 +107,12 @@ const HomeScreen = ({ route }) => {
         </View>
         <Text style={styles.expenseMemo}>{expense.memo || ' '}</Text>
         <Text style={styles.expenseAmount}>{expense.amount < 0 ? '-' : ''}₱{Math.abs(expense.amount).toFixed(2)}</Text>
+        <TouchableOpacity onPress={() => handleEditExpense(expense)}>
+          <MaterialCommunityIcons name="pencil" size={20} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleDeleteExpense(expense)}>
+          <MaterialCommunityIcons name="delete" size={20} color="black" />
+        </TouchableOpacity>
       </View>
     ));
   };
@@ -98,8 +122,27 @@ const HomeScreen = ({ route }) => {
     return foundCategory ? foundCategory.icon : 'plus-circle';
   };
 
-  const handleAddExpense = () => {
-    navigation.navigate('Add');
+  const handleEditExpense = (expense) => {
+    setEditExpense(expense);
+    setEditAmount(expense.amount.toString());
+    setEditModalVisible(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editAmount) {
+      Alert.alert('Please enter amount.');
+      return;
+    }
+    const editedExpenses = expenses.map(exp => {
+      if (exp === editExpense) {
+        return { ...exp, amount: parseFloat(editAmount) };
+      }
+      return exp;
+    });
+    const difference = parseFloat(editAmount) - editExpense.amount;
+    setExpenses(editedExpenses);
+    setTotalExpense(prevTotalExpense => prevTotalExpense + difference);
+    setEditModalVisible(false);
   };
 
   const addButtonStyle = {
@@ -174,9 +217,59 @@ const HomeScreen = ({ route }) => {
         </View>
       </ScrollView>
 
-      <TouchableOpacity style={addButtonStyle} onPress={handleAddExpense}>
+      <TouchableOpacity style={addButtonStyle} onPress={() => navigation.navigate('Add')}>
         <Text style={styles.addButtonIcon}>+</Text>
       </TouchableOpacity>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={deleteModalVisible}
+        onRequestClose={() => setDeleteModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>Are you sure you want to delete this expense?</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={confirmDeleteExpense} style={[styles.modalButton, { backgroundColor: '#3F5D32' }]}>
+                <Text style={styles.modalButtonText}>Yes</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setDeleteModalVisible(false)} style={[styles.modalButton, { backgroundColor: 'green' }]}>
+                <Text style={styles.modalButtonText}>No</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={editModalVisible}
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>Edit Expense Amount:</Text>
+            <TextInput
+              style={styles.input}
+              onChangeText={setEditAmount}
+              value={editAmount}
+              keyboardType="numeric"
+              placeholder="Enter amount"
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={handleSaveEdit} style={[styles.modalButton, { backgroundColor: 'green' }]}>
+                <Text style={styles.modalButtonText}>Save</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setEditModalVisible(false)} style={[styles.modalButton, { backgroundColor: '#3F5D32' }]}>
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
     </ImageBackground>
   );
 };
@@ -295,6 +388,45 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: 'cover',
     justifyContent: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+    borderRadius: 10,
+    elevation: 5,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  modalButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  modalButtonText: {
+    color: '#FFFFFF',
+    // fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 20,
+    paddingHorizontal: 10,
   },
 });
 

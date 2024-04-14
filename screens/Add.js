@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TextInput, Modal, Dimensions, Platform } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TextInput, Modal, Dimensions, Platform, ImageBackground } from 'react-native'; // Add ImageBackground import
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -80,51 +80,54 @@ const Add = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleGoBack}>
-          <MaterialCommunityIcons name="arrow-left" size={20} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.title}>Add Expense</Text>
+    <ImageBackground source={require('../assets/images/bg1.png')} style={styles.backgroundImage}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleGoBack}>
+            <MaterialCommunityIcons name="arrow-left" size={20} color="black" />
+          </TouchableOpacity>
+          <Text style={styles.title}>Add Expense</Text>
+        </View>
+        
+        <ScrollView style={styles.content}>
+          <View style={styles.categoryContainer}>{renderCategories()}</View>
+          <Modal visible={showInputs} animationType="slide">
+            <View style={styles.modalContainer}>
+              <TextInput
+                style={styles.input}
+                value={amount}
+                onChangeText={(text) => setAmount(text)}
+                placeholder="Amount"
+                keyboardType="numeric"
+              />
+              <TextInput
+                style={styles.input}
+                value={memo}
+                onChangeText={(text) => setMemo(text)}
+                placeholder="Memo"
+                multiline
+              />
+              <TextInput
+                style={styles.input}
+                value={income}
+                onChangeText={(text) => setIncome(text)}
+                placeholder="Income"
+                keyboardType="numeric"
+              />
+              <TouchableOpacity style={styles.addButton} onPress={handleAddExpense}>
+                <Text style={styles.addButtonText}>Add Expense</Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
+        </ScrollView>
       </View>
-      <ScrollView style={styles.content}>
-        <View style={styles.categoryContainer}>{renderCategories()}</View>
-        <Modal visible={showInputs} animationType="slide">
-          <View style={styles.modalContainer}>
-            <TextInput
-              style={styles.input}
-              value={amount}
-              onChangeText={(text) => setAmount(text)}
-              placeholder="Amount"
-              keyboardType="numeric"
-            />
-            <TextInput
-              style={styles.input}
-              value={memo}
-              onChangeText={(text) => setMemo(text)}
-              placeholder="Memo"
-              multiline
-            />
-            <TextInput
-              style={styles.input}
-              value={income}
-              onChangeText={(text) => setIncome(text)}
-              placeholder="Income"
-              keyboardType="numeric"
-            />
-            <TouchableOpacity style={styles.addButton} onPress={handleAddExpense}>
-              <Text style={styles.addButtonText}>Add Expense</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-      </ScrollView>
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'white',
+    backgroundColor: 'transparent',
     flex: 1,
     paddingHorizontal: 20,
   },
@@ -199,6 +202,11 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover',
+    justifyContent: 'center',
   },
 });
 
