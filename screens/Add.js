@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TextInput, Modal, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TextInput, Modal, Dimensions, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 
 const categories = [
-  { name: 'Transportation', icon: 'bus' },
-  { name: 'Groceries', icon: 'cart' },
-  { name: 'Utilities', icon: 'water' },
-  { name: 'Rent/Mortgage', icon: 'home' },
-  { name: 'Dining Out', icon: 'food' },
-  { name: 'Entertainment', icon: 'gamepad-variant' },
   { name: 'Clothing', icon: 'tshirt-crew' },
-  { name: 'Health/Medical', icon: 'hospital' },
+  { name: 'Dining Out', icon: 'food' },
   { name: 'Education', icon: 'school' },
-  { name: 'Insurance', icon: 'shield' },
+  { name: 'Entertainment', icon: 'gamepad-variant' },
   { name: 'Gifts/Donations', icon: 'gift' },
+  { name: 'Groceries', icon: 'cart' },
+  { name: 'Health/Medical', icon: 'hospital' },
+  { name: 'Insurance', icon: 'shield' },
+  { name: 'Miscellaneous', icon: 'plus-circle' },
   { name: 'Personal Care', icon: 'human-male-female' },
+  { name: 'Rent/Mortgage', icon: 'home' },
   { name: 'Subscriptions', icon: 'credit-card-plus' },
+  { name: 'Transportation', icon: 'bus' },
   { name: 'Travel', icon: 'airplane' },
-  { name: 'Miscellaneous', icon: 'plus-circle' }
+  { name: 'Utilities', icon: 'water' },
 ];
 
 const Add = () => {
@@ -54,45 +54,61 @@ const Add = () => {
     navigation.goBack();
   };
 
+  const renderItem = (category) => (
+    <TouchableOpacity style={styles.categoryItem} key={category.name} onPress={() => handleCategorySelect(category)}>
+      <View style={styles.categoryBox}>
+        <MaterialCommunityIcons name={category.icon} size={20} color="#3F5D32" />
+        <Text style={styles.categoryName}>{category.name}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  const renderCategories = () => {
+    if (Platform.OS === 'android') {
+      return categories.map((category, index) => (
+        <View style={[styles.categoryColumnAndroid, { width: '45%' }]} key={index}>
+          {renderItem(category)}
+        </View>
+      ));
+    } else {
+      return categories.map((category, index) => (
+        <View style={[styles.categoryColumnWeb, { width: '18%', margin: '0.5%' }]} key={index}>
+          {renderItem(category)}
+        </View>
+      ));
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={handleGoBack}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
+          <MaterialCommunityIcons name="arrow-left" size={20} color="black" />
         </TouchableOpacity>
         <Text style={styles.title}>Add Expense</Text>
       </View>
       <ScrollView style={styles.content}>
-        <View style={styles.categoryContainer}>
-          {categories.map((category, index) => (
-            <TouchableOpacity key={index} style={[styles.categoryItem, width > 500 ? styles.largeScreen : styles.smallScreen]} onPress={() => handleCategorySelect(category)}>
-              <View style={styles.categoryBox}>
-                <MaterialCommunityIcons name={category.icon} size={28} color="white" />
-                <Text style={styles.categoryName}>{category.name}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <View style={styles.categoryContainer}>{renderCategories()}</View>
         <Modal visible={showInputs} animationType="slide">
           <View style={styles.modalContainer}>
             <TextInput
               style={styles.input}
               value={amount}
-              onChangeText={text => setAmount(text)}
+              onChangeText={(text) => setAmount(text)}
               placeholder="Amount"
               keyboardType="numeric"
             />
             <TextInput
               style={styles.input}
               value={memo}
-              onChangeText={text => setMemo(text)}
+              onChangeText={(text) => setMemo(text)}
               placeholder="Memo"
               multiline
             />
             <TextInput
               style={styles.input}
               value={income}
-              onChangeText={text => setIncome(text)}
+              onChangeText={(text) => setIncome(text)}
               placeholder="Income"
               keyboardType="numeric"
             />
@@ -108,6 +124,7 @@ const Add = () => {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: 'white',
     flex: 1,
     paddingHorizontal: 20,
   },
@@ -118,7 +135,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     marginLeft: 10,
   },
@@ -131,32 +148,31 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 20,
   },
+  categoryColumnWeb: {
+    width: '18%',
+  },
+  categoryColumnAndroid: {
+    width: '45%',
+  },
   categoryItem: {
-    width: '48%',
     marginBottom: 20,
-  },
-  largeScreen: {
-    width: '23%',
-  },
-  smallScreen: {
-    width: '31%',
   },
   categoryBox: {
     alignItems: 'center',
-    backgroundColor: '#3F5D32',
+    backgroundColor: 'white',
     borderRadius: 5,
-    padding: 10,
-    elevation: 3, // Shadow for Android
-    shadowColor: '#000', // Shadow for iOS
+    padding: 8,
+    elevation: 2, // Shadow for Android
+    shadowColor: '#3F5D32', // Shadow for iOS
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOpacity: 0.50,
+    shadowRadius: 4.00,
   },
   categoryName: {
     marginTop: 5,
     fontSize: 14,
     textAlign: 'center',
-    color: 'white',
+    color: '#3F5D32',
   },
   modalContainer: {
     flex: 1,
