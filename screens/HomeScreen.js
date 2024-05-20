@@ -4,9 +4,11 @@ import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Calendar } from 'react-native-calendars';
 import moment from 'moment';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 
 const { width } = Dimensions.get('window');
 
+// Define categories array
 const categories = [
   { name: 'Transportation', icon: 'bus' },
   { name: 'Groceries', icon: 'cart' },
@@ -67,6 +69,16 @@ const HomeScreen = ({ route }) => {
     const markedDatesObj = { [dateStr]: { selected: true, marked: true, selectedColor: '#3F5D32' } };
     setMarkedDates(markedDatesObj);
   }, [selectedDate]);
+
+  useEffect(() => {
+    const balance = totalIncome - totalExpense;
+    if (balance < 0) {
+      Alert.alert(
+        'Balance Exceeded Income!',
+        `Your balance has exceeded your income by ₱${Math.abs(balance).toFixed(2)}.`
+      );
+    }
+  }, [totalIncome, totalExpense]);
 
   const calculateTotalExpensesForDate = (date) => {
     const formattedDate = moment(date).format('YYYY-MM-DD');
@@ -163,6 +175,23 @@ const HomeScreen = ({ route }) => {
     shadowRadius: 3.84,
   };
 
+  // Store data to AsyncStorage
+  useEffect(() => {
+    const storeData = async () => {
+      try {
+        await AsyncStorage.setItem('expenseData', JSON.stringify(expenses));
+      } catch (error) {
+        console.error('Error storing expense data:', error);
+      }
+    };
+
+    storeData();
+
+    return () => {
+      // Cleanup if needed
+    };
+  }, [expenses]);
+
   return (
     <ImageBackground source={require('../assets/images/bg1.png')} style={styles.backgroundImage}>
       <ScrollView style={styles.scrollContainer}>
@@ -198,7 +227,7 @@ const HomeScreen = ({ route }) => {
             </View>
             <View style={styles.summaryData}>
               <Text style={styles.summaryLabel}>Balance</Text>
-              <Text style={styles.summaryValue}>₱{(totalIncome - totalExpense).toFixed(2)}</Text>
+              <Text style={[styles.summaryValue, { color: totalIncome - totalExpense < 0 ? 'red' : 'black' }]}>₱{(totalIncome - totalExpense).toFixed(2)}</Text>
             </View>
           </View>
 

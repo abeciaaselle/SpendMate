@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TextInput, Modal, Dimensions, Platform, ImageBackground } from 'react-native'; // Add ImageBackground import
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TextInput, Modal, Dimensions, Platform, ImageBackground } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 
 const { width } = Dimensions.get('window');
 
@@ -31,17 +32,17 @@ const Add = () => {
   const [showInputs, setShowInputs] = useState(false);
   const navigation = useNavigation();
 
-  const handleAddExpense = () => {
+  const handleAddExpense = async () => {
     if (selectedCategory) {
       console.log('Added expense:', amount, memo);
-      navigation.navigate('Home', {
-        category: selectedCategory.name,
-        icon: selectedCategory.icon,
-        amount,
-        memo,
-        income: income || 0, // Use 0 if income is not provided
-        isExpense: true
-      });
+
+      try {
+        const expenseData = { category: selectedCategory.name, icon: selectedCategory.icon, amount, memo, income: income || 0, isExpense: true };
+        await AsyncStorage.setItem('expenseData', JSON.stringify(expenseData));
+        navigation.navigate('Home', expenseData);
+      } catch (error) {
+        console.error('Error saving expense:', error);
+      }
     }
   };
 
@@ -200,7 +201,6 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: 'white',
-    fontSize: 16,
     fontWeight: 'bold',
   },
   backgroundImage: {
