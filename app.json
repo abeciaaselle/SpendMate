@@ -24,7 +24,10 @@
       }
     },
     "web": {
-      "favicon": "./assets/images/Logo.png"
+      "favicon": "./assets/images/Logo.png",
+      "config": {
+        "webpack": "./webpack.config.js"
+      }
     }
   }
 }
