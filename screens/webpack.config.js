@@ -1,9 +1,13 @@
 const webpack = require('webpack');
+const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
   resolve: {
     fallback: {
-      crypto: require.resolve('crypto-browserify')
+      crypto: false
     }
-  }
+  },
+  externals: [
+    nodeExternals()
+  ]
 };
