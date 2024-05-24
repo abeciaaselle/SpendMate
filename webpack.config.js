@@ -1,5 +1,5 @@
 const createExpoWebpackConfigAsync = require('@expo/webpack-config');
-const path = require('path');
+const webpack = require('webpack'); // Add this line
 
 module.exports = async function(env, argv) {
   const config = await createExpoWebpackConfigAsync(env, argv);
