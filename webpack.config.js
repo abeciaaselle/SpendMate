@@ -1,5 +1,5 @@
 const createExpoWebpackConfigAsync = require('@expo/webpack-config');
-const webpack = require('webpack'); // Add this line
+const webpack = require('webpack');
 
 module.exports = async function(env, argv) {
   const config = await createExpoWebpackConfigAsync(env, argv);
@@ -9,6 +9,7 @@ module.exports = async function(env, argv) {
     crypto: require.resolve('crypto-browserify'),
     stream: require.resolve('stream-browserify'),
     buffer: require.resolve('buffer/'),
+    vm: require.resolve('vm-browserify') // Add this line
   };
 
   config.plugins = (config.plugins || []).concat([
