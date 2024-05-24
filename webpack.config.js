@@ -9,7 +9,8 @@ module.exports = async function(env, argv) {
     crypto: require.resolve('crypto-browserify'),
     stream: require.resolve('stream-browserify'),
     buffer: require.resolve('buffer/'),
-    vm: require.resolve('vm-browserify') // Add this line
+    vm: require.resolve('vm-browserify'),
+    process: require.resolve('process/browser') // Add process/browser
   };
 
   config.plugins = (config.plugins || []).concat([
