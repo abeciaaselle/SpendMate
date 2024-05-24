@@ -24,14 +24,7 @@
       }
     },
     "web": {
-      "favicon": "./assets/images/Logo.png",
-      "webpackConfig": {
-        "resolve": {
-          "fallback": {
-            "crypto": "crypto-browserify"
-          }
-        }
-      }
+      "favicon": "./assets/images/Logo.png"
     }
   }
 }
